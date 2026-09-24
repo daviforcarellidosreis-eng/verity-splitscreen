@@ -5,15 +5,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.InputEvent;
 
 /**
- * Handles only the second-player input path. The main player continues using keyboard/mouse.
+ * Input manager dedicated to the second local player.
+ * Keyboard/mouse remain exclusively attached to the main player.
  */
 public final class LocalInputManager {
     private final XboxControllerState controller = new XboxControllerState();
 
     public void tick() {
         controller.poll();
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null) {
+        if (Minecraft.getInstance().level == null) {
             return;
         }
 
@@ -27,7 +27,7 @@ public final class LocalInputManager {
     }
 
     public void handleKeyboardEvent(InputEvent.Key ignored) {
-        // Keyboard is intentionally never redirected to Player 2.
+        // intentionally empty: no keyboard input is forwarded to Player 2.
     }
 
     public XboxControllerState getXboxControllerState() {

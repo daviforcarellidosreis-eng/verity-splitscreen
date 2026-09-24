@@ -1,7 +1,6 @@
 package com.verity.common.secondplayer;
 
 import com.verity.client.input.XboxControllerState;
-import com.verity.common.verity.VerityMood;
 import com.verity.common.verity.VerityTransformationManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;

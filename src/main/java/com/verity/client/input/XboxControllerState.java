@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 /**
- * Reads the first GLFW joystick as a generic Xbox-style gamepad.
+ * Polls the first GLFW joystick and maps it to an Xbox-style layout.
  */
 public final class XboxControllerState {
     private static final int JOYSTICK = GLFW.GLFW_JOYSTICK_1;

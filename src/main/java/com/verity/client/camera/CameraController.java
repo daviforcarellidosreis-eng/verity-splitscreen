@@ -6,8 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 
 /**
- * Keeps the primary and secondary cameras separated. This is the modular camera layer
- * intended for future ports to other versions.
+ * Separates the camera state for the main player and the second local player.
+ * This is the modular camera layer intended for future version ports.
  */
 public final class CameraController {
     private static final CameraController INSTANCE = new CameraController();
