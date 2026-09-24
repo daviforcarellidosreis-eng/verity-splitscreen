@@ -9,20 +9,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class SecondPlayerEntity extends Player {
-    private static final EntityDataAccessor<Integer> DATA_COLOR =
-            SynchedEntityData.defineId(SecondPlayerEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> DATA_MOOD =
-            SynchedEntityData.defineId(SecondPlayerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.defineId(SecondPlayerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_MOOD = SynchedEntityData.defineId(SecondPlayerEntity.class, EntityDataSerializers.INT);
 
     public SecondPlayerEntity(EntityType<? extends Player> type, Level level) {
         super(type, level);
-        this.setUUID(java.util.UUID.randomUUID());
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(DATA_COLOR, 0xFF00FF);
+        this.entityData.define(DATA_COLOR, 0xFF66CC);
         this.entityData.define(DATA_MOOD, VerityMood.NORMAL.ordinal());
     }
 
@@ -35,10 +32,15 @@ public class SecondPlayerEntity extends Player {
     }
 
     public void setMood(VerityMood mood) {
+        if (mood == null) {
+            mood = VerityMood.NORMAL;
+        }
         this.entityData.set(DATA_MOOD, mood.ordinal());
     }
 
     public VerityMood getMood() {
-        return VerityMood.values()[this.entityData.get(DATA_MOOD)];
+        int ordinal = this.entityData.get(DATA_MOOD);
+        VerityMood[] values = VerityMood.values();
+        return ordinal >= 0 && ordinal < values.length ? values[ordinal] : VerityMood.NORMAL;
     }
 }
