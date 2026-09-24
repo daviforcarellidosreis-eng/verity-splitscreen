@@ -5,8 +5,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 /**
- * Simple split-screen marker. This is the visible part of the split-screen layer.
- * The real camera/render pipeline is isolated in the compatibility layer for Forge 1.21.1.
+ * Split-screen marker used while the real client camera pipeline is integrated in the
+ * version-specific compatibility layer.
  */
 public final class SplitScreenRenderer {
     private SplitScreenRenderer() {

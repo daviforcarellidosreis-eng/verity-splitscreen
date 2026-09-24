@@ -9,8 +9,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class SecondPlayerEntity extends Player {
-    private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.defineId(SecondPlayerEntity.class, EntityDataSerializers.INT);
-    private static final EntityDataAccessor<Integer> DATA_MOOD = SynchedEntityData.defineId(SecondPlayerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_COLOR =
+            SynchedEntityData.defineId(SecondPlayerEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_MOOD =
+            SynchedEntityData.defineId(SecondPlayerEntity.class, EntityDataSerializers.INT);
 
     public SecondPlayerEntity(EntityType<? extends Player> type, Level level) {
         super(type, level);

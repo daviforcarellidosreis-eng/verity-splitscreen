@@ -5,7 +5,6 @@ import com.verity.common.verity.VerityMood;
 import com.verity.common.verity.VerityTransformationManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.phys.Vec3;
 
 public final class SecondPlayerManager {
