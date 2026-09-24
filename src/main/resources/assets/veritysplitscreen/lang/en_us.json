@@ -1,0 +1,14 @@
+{
+  "en_us": {
+    "key.category.verity": "Verity",
+    "key.verity.menu": "Second Player Menu",
+    "key.verity.select": "Selection Screen",
+    "screen.verity.selection.title": "Player / Verity",
+    "screen.verity.selection.player": "PLAYER",
+    "screen.verity.selection.verity": "VERITY",
+    "screen.verity.selection.color": "Choose color",
+    "screen.verity.state.normal": "Normal",
+    "screen.verity.state.irritated": "Irritated",
+    "screen.verity.state.monster": "Monster"
+  }
+}
