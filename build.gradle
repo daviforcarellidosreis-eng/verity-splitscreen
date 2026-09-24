@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
-    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
 
 group = 'com.verity'
@@ -22,8 +21,6 @@ minecraft {
             workingDirectory = file('run')
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.check', 'false'
             args '--username', 'Dev'
             mods {
                 veritysplitscreen {
@@ -49,7 +46,6 @@ minecraft {
 repositories {
     mavenCentral()
     maven { url = 'https://maven.minecraftforge.net/' }
-    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
 }
 
 dependencies {
@@ -78,8 +74,4 @@ jar {
             'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-}
-
-mixin {
-    add sourceSets.main, 'veritysplitscreen.refmap.json'
 }

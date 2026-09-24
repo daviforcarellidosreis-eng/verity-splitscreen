@@ -1,38 +1,31 @@
-package com.verity.client.ui;
+package com.verity.common.verity;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+public final class VerityVisualState {
+    private VerityMood mood = VerityMood.NORMAL;
+    private float aggression = 0.0F;
+    private int color = 0xFF66CC;
 
-public final class SecondPlayerMenuScreen extends Screen {
-    public SecondPlayerMenuScreen() {
-        super(Component.literal("Verity Config"));
+    public VerityMood getMood() {
+        return mood;
     }
 
-    @Override
-    protected void init() {
-        super.init();
-        int centerX = this.width / 2;
-        int centerY = this.height / 2;
-
-        this.addRenderableWidget(Button.builder(Component.literal("Normal"), button -> {
-            this.minecraft.setScreen(null);
-        }).bounds(centerX - 90, centerY - 20, 180, 20).build());
-
-        this.addRenderableWidget(Button.builder(Component.literal("Irritated"), button -> {
-            this.minecraft.setScreen(null);
-        }).bounds(centerX - 90, centerY + 10, 180, 20).build());
-
-        this.addRenderableWidget(Button.builder(Component.literal("Monster"), button -> {
-            this.minecraft.setScreen(null);
-        }).bounds(centerX - 90, centerY + 40, 180, 20).build());
+    public void setMood(VerityMood mood) {
+        this.mood = mood;
     }
 
-    @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, "VERITY", this.width / 2, 30, 0xFFFFFFFF);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public float getAggression() {
+        return aggression;
+    }
+
+    public void setAggression(float aggression) {
+        this.aggression = aggression;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 }

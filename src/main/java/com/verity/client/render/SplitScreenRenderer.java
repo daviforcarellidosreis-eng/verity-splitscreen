@@ -1,58 +1,26 @@
-package com.verity.client.camera;
+package com.verity.client.render;
 
-import com.verity.common.secondplayer.SecondPlayerManager;
-import net.minecraft.client.Camera;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.gui.GuiGraphics;
 
-public final class CameraController {
-    private static final CameraController INSTANCE = new CameraController();
-
-    private Camera primaryCamera;
-    private Camera secondaryCamera;
-
-    private CameraController() {
+public final class SplitScreenRenderer {
+    private SplitScreenRenderer() {
     }
 
-    public static CameraController getInstance() {
-        return INSTANCE;
-    }
-
-    public void updatePrimaryCamera(Camera camera) {
-        this.primaryCamera = camera;
-    }
-
-    public void updateSecondaryCamera(Camera camera) {
-        this.secondaryCamera = camera;
-    }
-
-    public Camera getPrimaryCamera() {
-        return primaryCamera;
-    }
-
-    public Camera getSecondaryCamera() {
-        return secondaryCamera;
-    }
-
-    public void updateLocalCameras(Minecraft minecraft) {
+    public static void render(GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight, Minecraft minecraft) {
         if (minecraft.player == null) {
             return;
         }
 
-        Entity player = minecraft.player;
-        if (primaryCamera == null) {
-            primaryCamera = new Camera(player);
-        }
-        primaryCamera.set(player, false);
+        int splitX = screenWidth / 2;
 
-        if (SecondPlayerManager.getInstance().isActive()) {
-            var second = SecondPlayerManager.getInstance().getSecondPlayer();
-            if (second != null) {
-                if (secondaryCamera == null) {
-                    secondaryCamera = new Camera(second);
-                }
-                secondaryCamera.set(second, false);
-            }
-        }
+        RenderSystem.disableDepthTest();
+        guiGraphics.fill(0, 0, splitX, screenHeight, 0xFF101010);
+        guiGraphics.fill(splitX, 0, screenWidth, screenHeight, 0xFF1A1A1A);
+        guiGraphics.drawString(minecraft.font, "PLAYER 1", 12, 12, 0xFFFFFFFF, false);
+        guiGraphics.drawString(minecraft.font, "PLAYER 2", splitX + 12, 12, 0xFFFFFFFF, false);
+        RenderSystem.enableDepthTest();
     }
 }

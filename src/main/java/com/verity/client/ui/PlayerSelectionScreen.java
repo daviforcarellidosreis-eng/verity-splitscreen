@@ -1,46 +1,35 @@
-package com.verity.common.verity;
+package com.verity.client.ui;
 
-public final class VerityTransformationManager {
-    private float irritation = 0.0F;
-    private VerityMood mood = VerityMood.NORMAL;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
-    public float tickIrritation() {
-        irritation = Math.min(100.0F, irritation + 0.25F);
-        if (irritation >= 70.0F) {
-            mood = VerityMood.IRRITATED;
-        }
-        if (irritation >= 100.0F) {
-            mood = VerityMood.MONSTER;
-        }
-        return irritation;
+public final class PlayerSelectionScreen extends Screen {
+    public PlayerSelectionScreen() {
+        super(Component.literal("Player / Verity"));
     }
 
-    public boolean canTransform() {
-        return irritation >= 100.0F;
+    @Override
+    protected void init() {
+        super.init();
+        int cx = width / 2;
+        int cy = height / 2;
+
+        addRenderableWidget(Button.builder(Component.literal("PLAYER"), button -> {
+            this.minecraft.setScreen(null);
+        }).bounds(cx - 150, cy - 20, 120, 20).build());
+
+        addRenderableWidget(Button.builder(Component.literal("VERITY"), button -> {
+            this.minecraft.setScreen(new SecondPlayerMenuScreen());
+        }).bounds(cx + 30, cy - 20, 120, 20).build());
     }
 
-    public void applyTransformation() {
-        if (canTransform()) {
-            mood = VerityMood.MONSTER;
-        }
-    }
-
-    public VerityMood getMood() {
-        return mood;
-    }
-
-    public float getIrritation() {
-        return irritation;
-    }
-
-    public void setIrritation(float irritation) {
-        this.irritation = irritation;
-        if (irritation >= 70.0F && irritation < 100.0F) {
-            this.mood = VerityMood.IRRITATED;
-        } else if (irritation >= 100.0F) {
-            this.mood = VerityMood.MONSTER;
-        } else {
-            this.mood = VerityMood.NORMAL;
-        }
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.drawCenteredString(this.font, "PLAYER", width / 2 - 90, height / 2 - 55, 0xFFFFFFFF);
+        guiGraphics.drawCenteredString(this.font, "VERITY", width / 2 + 90, height / 2 - 55, 0xFFFFFFFF);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 }

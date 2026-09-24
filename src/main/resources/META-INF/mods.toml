@@ -7,10 +7,8 @@ issueTrackerURL="https://github.com/daviforcarellidosreis-eng/verity-splitscreen
 modId="veritysplitscreen"
 version="0.1.0"
 displayName="Verity SplitScreen"
-description="Local split-screen mod for Minecraft 1.21.1 with second player and Verity transformation system."
+description="Local split-screen mod for Minecraft 1.21.1 with second-player support and Verity transformation system."
 authors="daviforcarellidosreis-eng"
-logoFile="icon.png"
-credits="Forge, Minecraft, and the Verity project architecture."
 
 [[dependencies.veritysplitscreen]]
 modId="forge"

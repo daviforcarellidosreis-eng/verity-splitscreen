@@ -1,60 +1,137 @@
 package com.verity.common.secondplayer;
 
 import com.verity.common.verity.VerityMood;
+import com.verity.common.verity.VerityTransformationManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 
-public final class SecondPlayerState {
+public final class SecondPlayerManager {
+    private static final SecondPlayerManager INSTANCE = new SecondPlayerManager();
+
     private boolean active;
-    private boolean playerSelected;
-    private boolean veritySelected;
-    private int color;
-    private float irritation;
-    private VerityMood mood = VerityMood.NORMAL;
+    private boolean clientReady;
+    private SecondPlayerEntity secondPlayer;
+    private final SecondPlayerState state = new SecondPlayerState();
+    private final VerityTransformationManager transformation = new VerityTransformationManager();
+    private XboxControllerState xboxControllerState = new XboxControllerState();
+
+    private SecondPlayerManager() {
+    }
+
+    public static SecondPlayerManager getInstance() {
+        return INSTANCE;
+    }
+
+    public void setClientReady(boolean clientReady) {
+        this.clientReady = clientReady;
+    }
+
+    public boolean isClientReady() {
+        return clientReady;
+    }
 
     public boolean isActive() {
         return active;
     }
 
+    public void activate() {
+        active = true;
+        if (Minecraft.getInstance().level != null) {
+            ensureSpawned();
+        }
+    }
+
+    public void deactivate() {
+        active = false;
+        if (secondPlayer != null) {
+            secondPlayer.discard();
+            secondPlayer = null;
+        }
+    }
+
+    public void reset() {
+        active = false;
+        secondPlayer = null;
+    }
+
+    public void ensureSpawned() {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.level == null || minecraft.player == null) {
+            return;
+        }
+
+        if (secondPlayer == null || !secondPlayer.isAlive()) {
+            secondPlayer = new SecondPlayerEntity(com.verity.VeritySplitMod.SECOND_PLAYER.get(), minecraft.level);
+            BlockPos pos = minecraft.player.blockPosition().offset(2, 0, 2);
+            secondPlayer.setPos(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
+            minecraft.level.addFreshEntity(secondPlayer);
+        }
+    }
+
+    public SecondPlayerEntity getSecondPlayer() {
+        return secondPlayer;
+    }
+
+    public void setXboxControllerState(XboxControllerState state) {
+        this.xboxControllerState = state;
+        if (state != null && state.isStartPressed()) {
+            setActive(true);
+        }
+    }
+
+    public XboxControllerState getXboxControllerState() {
+        return xboxControllerState;
+    }
+
+    public void tick() {
+        if (!active || secondPlayer == null) {
+            return;
+        }
+
+        if (Minecraft.getInstance().player == null) {
+            return;
+        }
+
+        float xAxis = xboxControllerState.getLeftX();
+        float zAxis = xboxControllerState.getLeftY();
+        secondPlayer.setYRot(secondPlayer.getYRot() + xboxControllerState.getRightX() * 2.0F);
+        secondPlayer.setXRot(secondPlayer.getXRot() + xboxControllerState.getRightY() * 2.0F);
+
+        if (Math.abs(xAxis) > 0.05F || Math.abs(zAxis) > 0.05F) {
+            double speed = 0.20D;
+            secondPlayer.setDeltaMovement(
+                    xAxis * speed,
+                    secondPlayer.getDeltaMovement().y,
+                    -zAxis * speed
+            );
+        }
+
+        if (xboxControllerState.isAPressed()) {
+            secondPlayer.jumpFromGround();
+        }
+
+        secondPlayer.setShiftKeyDown(xboxControllerState.isBPressed());
+        secondPlayer.setSprinting(xboxControllerState.isRtPressed());
+
+        state.setIrritation(transformation.tickIrritation());
+        state.setMood(transformation.getMood());
+        secondPlayer.setMood(transformation.getMood());
+    }
+
+    public SecondPlayerState getState() {
+        return state;
+    }
+
+    public VerityTransformationManager getTransformation() {
+        return transformation;
+    }
+
     public void setActive(boolean active) {
         this.active = active;
-    }
-
-    public boolean isPlayerSelected() {
-        return playerSelected;
-    }
-
-    public void setPlayerSelected(boolean playerSelected) {
-        this.playerSelected = playerSelected;
-    }
-
-    public boolean isVeritySelected() {
-        return veritySelected;
-    }
-
-    public void setVeritySelected(boolean veritySelected) {
-        this.veritySelected = veritySelected;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
-    }
-
-    public float getIrritation() {
-        return irritation;
-    }
-
-    public void setIrritation(float irritation) {
-        this.irritation = irritation;
-    }
-
-    public VerityMood getMood() {
-        return mood;
-    }
-
-    public void setMood(VerityMood mood) {
-        this.mood = mood;
+        state.setActive(active);
+        if (active) {
+            ensureSpawned();
+        }
     }
 }

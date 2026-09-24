@@ -1,46 +1,58 @@
-package com.verity.client.input;
+package com.verity.client.camera;
 
-import com.verity.client.ui.PlayerSelectionScreen;
 import com.verity.common.secondplayer.SecondPlayerManager;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.InputEvent;
+import net.minecraft.world.entity.Entity;
 
-public final class LocalInputManager {
-    private final XboxControllerState xboxControllerState = new XboxControllerState();
-    private boolean splitScreenEnabled;
+public final class CameraController {
+    private static final CameraController INSTANCE = new CameraController();
 
-    public LocalInputManager() {
-        this.xboxControllerState.setConnected(true);
+    private Camera primaryCamera;
+    private Camera secondaryCamera;
+
+    private CameraController() {
     }
 
-    public void handleKeyboardEvent(InputEvent.Key event) {
-        if (event.getKey() == 48 && event.getAction() == 1) {
-            // B key as placeholder for Player 2 toggle if needed.
-            if (Minecraft.getInstance().screen == null) {
-                Minecraft.getInstance().setScreen(new PlayerSelectionScreen());
+    public static CameraController getInstance() {
+        return INSTANCE;
+    }
+
+    public void updatePrimaryCamera(Camera camera) {
+        this.primaryCamera = camera;
+    }
+
+    public void updateSecondaryCamera(Camera camera) {
+        this.secondaryCamera = camera;
+    }
+
+    public Camera getPrimaryCamera() {
+        return primaryCamera;
+    }
+
+    public Camera getSecondaryCamera() {
+        return secondaryCamera;
+    }
+
+    public void updateLocalCameras(Minecraft minecraft) {
+        if (minecraft.player == null) {
+            return;
+        }
+
+        Entity player = minecraft.player;
+        if (primaryCamera == null) {
+            primaryCamera = new Camera(player, false);
+        }
+        primaryCamera.set(player, false);
+
+        if (SecondPlayerManager.getInstance().isActive()) {
+            var second = SecondPlayerManager.getInstance().getSecondPlayer();
+            if (second != null) {
+                if (secondaryCamera == null) {
+                    secondaryCamera = new Camera(second, false);
+                }
+                secondaryCamera.set(second, false);
             }
         }
-    }
-
-    public XboxControllerState getXboxControllerState() {
-        return xboxControllerState;
-    }
-
-    public boolean isSplitScreenEnabled() {
-        return splitScreenEnabled;
-    }
-
-    public void setSplitScreenEnabled(boolean splitScreenEnabled) {
-        this.splitScreenEnabled = splitScreenEnabled;
-        if (!splitScreenEnabled) {
-            SecondPlayerManager.getInstance().deactivate();
-        }
-    }
-
-    public void activateSecondPlayer() {
-        if (!splitScreenEnabled) {
-            splitScreenEnabled = true;
-        }
-        SecondPlayerManager.getInstance().activate();
     }
 }
