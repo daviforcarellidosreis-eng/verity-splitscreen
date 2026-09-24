@@ -1,6 +1,20 @@
 package com.verity.client.input;
 
+import org.lwjgl.glfw.GLFW;
+
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+
+/** Polls the first GLFW joystick. GLFW exposes Xbox-compatible XInput devices as a gamepad/joystick. */
 public final class XboxControllerState {
+    private static final int JOYSTICK = GLFW.GLFW_JOYSTICK_1;
+    private static final int BUTTON_A = 0;
+    private static final int BUTTON_B = 1;
+    private static final int BUTTON_X = 2;
+    private static final int BUTTON_Y = 3;
+    private static final int BUTTON_BACK = 6;
+    private static final int BUTTON_START = 7;
+
     private boolean connected;
     private boolean startPressed;
     private boolean backPressed;
@@ -17,48 +31,61 @@ public final class XboxControllerState {
     private float triggerLeft;
     private float triggerRight;
 
+    public void poll() {
+        boolean wasStart = startPressed;
+        boolean wasBack = backPressed;
+        connected = GLFW.glfwJoystickPresent(JOYSTICK);
+        if (!connected) {
+            clear();
+            return;
+        }
+
+        FloatBuffer axes = GLFW.glfwGetJoystickAxes(JOYSTICK);
+        ByteBuffer buttons = GLFW.glfwGetJoystickButtons(JOYSTICK);
+        leftX = axis(axes, 0);
+        leftY = axis(axes, 1);
+        rightX = axis(axes, 2);
+        rightY = axis(axes, 3);
+        triggerLeft = axis(axes, 4);
+        triggerRight = axis(axes, 5);
+
+        aPressed = button(buttons, BUTTON_A);
+        bPressed = button(buttons, BUTTON_B);
+        xPressed = button(buttons, BUTTON_X);
+        yPressed = button(buttons, BUTTON_Y);
+        startPressed = button(buttons, BUTTON_START) && !wasStart;
+        backPressed = button(buttons, BUTTON_BACK) && !wasBack;
+        rtPressed = triggerRight > 0.35F || button(buttons, 5);
+        ltPressed = triggerLeft > 0.35F || button(buttons, 4);
+    }
+
+    private static float axis(FloatBuffer values, int index) {
+        return values != null && index < values.limit() ? values.get(index) : 0.0F;
+    }
+
+    private static boolean button(ByteBuffer values, int index) {
+        return values != null && index < values.limit() && values.get(index) == GLFW.GLFW_PRESS;
+    }
+
+    private void clear() {
+        startPressed = false; backPressed = false; aPressed = false; bPressed = false;
+        xPressed = false; yPressed = false; rtPressed = false; ltPressed = false;
+        leftX = leftY = rightX = rightY = triggerLeft = triggerRight = 0.0F;
+    }
+
     public boolean isConnected() { return connected; }
-    public void setConnected(boolean connected) { this.connected = connected; }
-
     public boolean isStartPressed() { return startPressed; }
-    public void setStartPressed(boolean startPressed) { this.startPressed = startPressed; }
-
     public boolean isBackPressed() { return backPressed; }
-    public void setBackPressed(boolean backPressed) { this.backPressed = backPressed; }
-
     public boolean isAPressed() { return aPressed; }
-    public void setAPressed(boolean aPressed) { this.aPressed = aPressed; }
-
     public boolean isBPressed() { return bPressed; }
-    public void setBPressed(boolean bPressed) { this.bPressed = bPressed; }
-
     public boolean isXPressed() { return xPressed; }
-    public void setXPressed(boolean xPressed) { this.xPressed = xPressed; }
-
     public boolean isYPressed() { return yPressed; }
-    public void setYPressed(boolean yPressed) { this.yPressed = yPressed; }
-
     public boolean isRtPressed() { return rtPressed; }
-    public void setRtPressed(boolean rtPressed) { this.rtPressed = rtPressed; }
-
     public boolean isLtPressed() { return ltPressed; }
-    public void setLtPressed(boolean ltPressed) { this.ltPressed = ltPressed; }
-
     public float getLeftX() { return leftX; }
-    public void setLeftX(float leftX) { this.leftX = leftX; }
-
     public float getLeftY() { return leftY; }
-    public void setLeftY(float leftY) { this.leftY = leftY; }
-
     public float getRightX() { return rightX; }
-    public void setRightX(float rightX) { this.rightX = rightX; }
-
     public float getRightY() { return rightY; }
-    public void setRightY(float rightY) { this.rightY = rightY; }
-
     public float getTriggerLeft() { return triggerLeft; }
-    public void setTriggerLeft(float triggerLeft) { this.triggerLeft = triggerLeft; }
-
     public float getTriggerRight() { return triggerRight; }
-    public void setTriggerRight(float triggerRight) { this.triggerRight = triggerRight; }
 }

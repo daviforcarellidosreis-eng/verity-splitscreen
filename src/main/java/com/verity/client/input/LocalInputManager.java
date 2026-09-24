@@ -1,42 +1,33 @@
 package com.verity.client.input;
 
+import com.verity.client.ui.PlayerSelectionScreen;
 import com.verity.common.secondplayer.SecondPlayerManager;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.InputEvent;
 
+/** Owns only controller input; keyboard/mouse remain owned by Minecraft's local player. */
 public final class LocalInputManager {
-    private final XboxControllerState xboxControllerState = new XboxControllerState();
-    private boolean splitScreenEnabled;
+    private final XboxControllerState controller = new XboxControllerState();
 
-    public LocalInputManager() {
-        this.xboxControllerState.setConnected(true);
-    }
-
-    public void handleKeyboardEvent(InputEvent.Key event) {
-        if (event.getKey() == 48 && event.getAction() == 1) {
-            if (Minecraft.getInstance().screen == null) {
-                // No-op placeholder. Selection UI can be opened later in the menu flow.
-            }
+    public void tick() {
+        controller.poll();
+        Minecraft mc = Minecraft.getInstance();
+        if (controller.isStartPressed() && mc.level != null && mc.screen == null) {
+            mc.setScreen(new PlayerSelectionScreen());
+        }
+        if (controller.isBackPressed() && SecondPlayerManager.getInstance().isActive() && mc.screen == null) {
+            mc.setScreen(new com.verity.client.ui.SecondPlayerMenuScreen());
         }
     }
 
-    public XboxControllerState getXboxControllerState() {
-        return xboxControllerState;
+    public void handleKeyboardEvent(InputEvent.Key ignored) {
+        // Deliberately empty: no keyboard event is forwarded to Player 2.
     }
 
-    public boolean isSplitScreenEnabled() {
-        return splitScreenEnabled;
-    }
-
-    public void setSplitScreenEnabled(boolean splitScreenEnabled) {
-        this.splitScreenEnabled = splitScreenEnabled;
-        if (!splitScreenEnabled) {
-            SecondPlayerManager.getInstance().deactivate();
-        }
-    }
-
-    public void activateSecondPlayer() {
-        splitScreenEnabled = true;
-        SecondPlayerManager.getInstance().activate();
+    public XboxControllerState getXboxControllerState() { return controller; }
+    public boolean isSplitScreenEnabled() { return SecondPlayerManager.getInstance().isActive(); }
+    public void activateSecondPlayer() { SecondPlayerManager.getInstance().activate(); }
+    public void setSplitScreenEnabled(boolean enabled) {
+        if (enabled) activateSecondPlayer(); else SecondPlayerManager.getInstance().deactivate();
     }
 }

@@ -1,26 +1,21 @@
 package com.verity.client.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.verity.common.secondplayer.SecondPlayerManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
+/** UI compositor. World rendering must be injected before the vanilla GUI pass; this class does not fake it with rectangles. */
 public final class SplitScreenRenderer {
-    private SplitScreenRenderer() {
-    }
+    private SplitScreenRenderer() { }
 
-    public static void render(GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight, Minecraft minecraft) {
-        if (minecraft.player == null) {
-            return;
-        }
-
-        int splitX = screenWidth / 2;
-
+    public static void render(GuiGraphics graphics, float partialTick, int width, int height, Minecraft mc) {
+        if (!SecondPlayerManager.getInstance().isActive()) return;
         RenderSystem.disableDepthTest();
-        guiGraphics.fill(0, 0, splitX, screenHeight, 0xFF101010);
-        guiGraphics.fill(splitX, 0, screenWidth, screenHeight, 0xFF1A1A1A);
-        guiGraphics.drawString(minecraft.font, "PLAYER 1", 12, 12, 0xFFFFFFFF, false);
-        guiGraphics.drawString(minecraft.font, "PLAYER 2", splitX + 12, 12, 0xFFFFFFFF, false);
+        int x = width / 2;
+        graphics.fill(x - 1, 0, x + 1, height, 0xFFFFFFFF);
+        graphics.drawString(mc.font, "PLAYER 1", 8, 8, 0xFFFFFFFF, true);
+        graphics.drawString(mc.font, "PLAYER 2", x + 8, 8, 0xFFFFFFFF, true);
         RenderSystem.enableDepthTest();
     }
 }
