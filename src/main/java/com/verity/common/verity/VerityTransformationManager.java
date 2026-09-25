@@ -10,7 +10,6 @@ public final class VerityTransformationManager {
     }
 
     public float applyStress(float delta) {
-        hatredCheck(delta);
         irritation = Math.max(0.0F, Math.min(MAX_IRRITATION, irritation + delta));
         updateMood();
         return irritation;
@@ -46,12 +45,6 @@ public final class VerityTransformationManager {
             mood = VerityMood.MONSTER;
         } else {
             mood = VerityMood.NORMAL;
-        }
-    }
-
-    private void hatredCheck(float delta) {
-        if (delta < 0.0F) {
-            return;
         }
     }
 }

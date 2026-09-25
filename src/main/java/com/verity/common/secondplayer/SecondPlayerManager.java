@@ -143,7 +143,7 @@ public final class SecondPlayerManager {
         }
 
         transformation.applyStress(irritationDelta);
-        VisualizeVerity();
+        updateVisualState();
 
         state.setIrritation(transformation.getIrritation());
         state.setMood(transformation.getMood());
@@ -172,7 +172,7 @@ public final class SecondPlayerManager {
         }
     }
 
-    private void VisualizeVerity() {
+    private void updateVisualState() {
         visualState.setMood(transformation.getMood());
         visualState.setAggression(transformation.getIrritation() / 100.0F);
         switch (transformation.getMood()) {
