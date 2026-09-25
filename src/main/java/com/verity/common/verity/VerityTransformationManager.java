@@ -1,23 +1,23 @@
 package com.verity.common.verity;
 
 public final class VerityTransformationManager {
+    private static final float MAX_IRRITATION = 100.0F;
     private float irritation = 0.0F;
     private VerityMood mood = VerityMood.NORMAL;
 
     public float tickIrritation() {
-        irritation = Math.min(100.0F, irritation + 0.25F);
-        if (irritation >= 70.0F && irritation < 100.0F) {
-            mood = VerityMood.IRRITATED;
-        } else if (irritation >= 100.0F) {
-            mood = VerityMood.MONSTER;
-        } else {
-            mood = VerityMood.NORMAL;
-        }
+        return applyStress(0.25F);
+    }
+
+    public float applyStress(float delta) {
+        hatredCheck(delta);
+        irritation = Math.max(0.0F, Math.min(MAX_IRRITATION, irritation + delta));
+        updateMood();
         return irritation;
     }
 
     public boolean canTransform() {
-        return irritation >= 100.0F;
+        return irritation >= MAX_IRRITATION;
     }
 
     public void applyTransformation() {
@@ -35,13 +35,23 @@ public final class VerityTransformationManager {
     }
 
     public void setIrritation(float irritation) {
-        this.irritation = irritation;
-        if (irritation >= 70.0F && irritation < 100.0F) {
-            this.mood = VerityMood.IRRITATED;
-        } else if (irritation >= 100.0F) {
-            this.mood = VerityMood.MONSTER;
+        this.irritation = Math.max(0.0F, Math.min(MAX_IRRITATION, irritation));
+        updateMood();
+    }
+
+    private void updateMood() {
+        if (irritation >= 70.0F && irritation < MAX_IRRITATION) {
+            mood = VerityMood.IRRITATED;
+        } else if (irritation >= MAX_IRRITATION) {
+            mood = VerityMood.MONSTER;
         } else {
-            this.mood = VerityMood.NORMAL;
+            mood = VerityMood.NORMAL;
+        }
+    }
+
+    private void hatredCheck(float delta) {
+        if (delta < 0.0F) {
+            return;
         }
     }
 }

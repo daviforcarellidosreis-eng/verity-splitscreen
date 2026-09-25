@@ -10,7 +10,12 @@ public final class VerityVisualState {
     }
 
     public void setMood(VerityMood mood) {
-        this.mood = mood;
+        this.mood = mood == null ? VerityMood.NORMAL : mood;
+        switch (this.mood) {
+            case MONSTER -> color = 0xFF3A2A;
+            case IRRITATED -> color = 0xFFB347;
+            default -> color = 0xFF66CC;
+        }
     }
 
     public float getAggression() {
@@ -18,7 +23,7 @@ public final class VerityVisualState {
     }
 
     public void setAggression(float aggression) {
-        this.aggression = aggression;
+        this.aggression = Math.max(0.0F, Math.min(1.0F, aggression));
     }
 
     public int getColor() {

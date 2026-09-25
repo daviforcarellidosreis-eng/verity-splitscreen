@@ -1,25 +1,36 @@
 package com.verity.common.secondplayer;
 
-import com.verity.client.input.XboxControllerState;
+import com.verity.common.verity.VerityMood;
 import com.verity.common.verity.VerityTransformationManager;
+import com.verity.common.verity.VerityVisualState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.player.Player;
 
 public final class SecondPlayerManager {
     private static final SecondPlayerManager INSTANCE = new SecondPlayerManager();
 
     private boolean active;
+    private boolean clientReady;
     private SecondPlayerEntity secondPlayer;
     private final SecondPlayerState state = new SecondPlayerState();
     private final VerityTransformationManager transformation = new VerityTransformationManager();
-    private XboxControllerState controller = new XboxControllerState();
+    private final VerityVisualState visualState = new VerityVisualState();
+    private XboxControllerState xboxControllerState = new XboxControllerState();
 
     private SecondPlayerManager() {
     }
 
     public static SecondPlayerManager getInstance() {
         return INSTANCE;
+    }
+
+    public void setClientReady(boolean clientReady) {
+        this.clientReady = clientReady;
+    }
+
+    public boolean isClientReady() {
+        return clientReady;
     }
 
     public boolean isActive() {
@@ -29,7 +40,9 @@ public final class SecondPlayerManager {
     public void activate() {
         active = true;
         state.setActive(true);
-        ensureSpawned();
+        if (Minecraft.getInstance().level != null) {
+            ensureSpawned();
+        }
     }
 
     public void deactivate() {
@@ -42,20 +55,23 @@ public final class SecondPlayerManager {
     }
 
     public void reset() {
-        deactivate();
+        active = false;
+        secondPlayer = null;
+        state.setActive(false);
     }
 
     public void ensureSpawned() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || mc.player == null) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.level == null || minecraft.player == null) {
             return;
         }
 
         if (secondPlayer == null || !secondPlayer.isAlive()) {
-            secondPlayer = new SecondPlayerEntity(com.verity.VeritySplitMod.SECOND_PLAYER.get(), mc.level);
-            BlockPos pos = mc.player.blockPosition().offset(2, 0, 2);
+            secondPlayer = new SecondPlayerEntity(com.verity.VeritySplitMod.SECOND_PLAYER.get(), minecraft.level);
+            BlockPos pos = minecraft.player.blockPosition().offset(2, 0, 2);
             secondPlayer.setPos(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
-            mc.level.addFreshEntity(secondPlayer);
+            secondPlayer.setCustomColor(visualState.getColor());
+            minecraft.level.addFreshEntity(secondPlayer);
         }
     }
 
@@ -63,22 +79,15 @@ public final class SecondPlayerManager {
         return secondPlayer;
     }
 
-    public void setXboxControllerState(XboxControllerState controller) {
-        if (controller != null) {
-            this.controller = controller;
+    public void setXboxControllerState(XboxControllerState state) {
+        this.xboxControllerState = state;
+        if (state != null && state.isStartPressed()) {
+            setActive(true);
         }
     }
 
     public XboxControllerState getXboxControllerState() {
-        return controller;
-    }
-
-    public SecondPlayerState getState() {
-        return state;
-    }
-
-    public VerityTransformationManager getTransformation() {
-        return transformation;
+        return xboxControllerState;
     }
 
     public void tick() {
@@ -91,30 +100,86 @@ public final class SecondPlayerManager {
             return;
         }
 
-        float moveX = deadZone(controller.getLeftX());
-        float moveY = -deadZone(controller.getLeftY());
-        float aimX = deadZone(controller.getRightX());
-        float aimY = deadZone(controller.getRightY());
+        Player player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
 
-        secondPlayer.setYRot(secondPlayer.getYRot() + aimX * 3.0F);
-        secondPlayer.setXRot(Math.max(-90.0F, Math.min(90.0F, secondPlayer.getXRot() + aimY * 3.0F)));
+        float xAxis = deadZone(xboxControllerState.getLeftX());
+        float zAxis = deadZone(xboxControllerState.getLeftY());
+        float rotationX = deadZone(xboxControllerState.getRightX());
+        float rotationY = deadZone(xboxControllerState.getRightY());
+
+        secondPlayer.setYRot(secondPlayer.getYRot() + rotationX * 3.0F);
+        secondPlayer.setXRot(secondPlayer.getXRot() + rotationY * 3.0F);
 
         double yaw = Math.toRadians(secondPlayer.getYRot());
-        double dx = (moveX * Math.cos(yaw) - moveY * Math.sin(yaw)) * 0.18D;
-        double dz = (moveY * Math.cos(yaw) + moveX * Math.sin(yaw)) * 0.18D;
+        double speed = 0.18D;
+        if (Math.abs(xAxis) > 0.02F || Math.abs(zAxis) > 0.02F) {
+            double dx = (xAxis * Math.cos(yaw) - (-zAxis) * Math.sin(yaw)) * speed;
+            double dz = ((-zAxis) * Math.cos(yaw) + xAxis * Math.sin(yaw)) * speed;
+            secondPlayer.setDeltaMovement(dx, secondPlayer.getDeltaMovement().y, dz);
+        }
 
-        secondPlayer.setDeltaMovement(new Vec3(dx, secondPlayer.getDeltaMovement().y, dz));
-
-        if (controller.isAPressed() && secondPlayer.onGround()) {
+        if (xboxControllerState.isAPressed()) {
             secondPlayer.jumpFromGround();
         }
 
-        secondPlayer.setShiftKeyDown(controller.isBPressed());
-        secondPlayer.setSprinting(controller.isRtPressed());
+        secondPlayer.setShiftKeyDown(xboxControllerState.isBPressed());
+        secondPlayer.setSprinting(xboxControllerState.isRtPressed());
 
-        state.setIrritation(transformation.tickIrritation());
+        float irritationDelta = 0.0F;
+        if (Math.abs(xAxis) > 0.05F || Math.abs(zAxis) > 0.05F) {
+            irritationDelta += 0.15F;
+        }
+        if (xboxControllerState.isRtPressed()) {
+            irritationDelta += 0.25F;
+        }
+        if (xboxControllerState.isAPressed()) {
+            irritationDelta += 0.30F;
+        }
+        if (xboxControllerState.isBPressed()) {
+            irritationDelta += 0.10F;
+        }
+
+        transformation.applyStress(irritationDelta);
+        VisualizeVerity();
+
+        state.setIrritation(transformation.getIrritation());
         state.setMood(transformation.getMood());
+        state.setColor(visualState.getColor());
         secondPlayer.setMood(transformation.getMood());
+        secondPlayer.setCustomColor(visualState.getColor());
+    }
+
+    public SecondPlayerState getState() {
+        return state;
+    }
+
+    public VerityTransformationManager getTransformation() {
+        return transformation;
+    }
+
+    public VerityVisualState getVisualState() {
+        return visualState;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+        state.setActive(active);
+        if (active) {
+            ensureSpawned();
+        }
+    }
+
+    private void VisualizeVerity() {
+        visualState.setMood(transformation.getMood());
+        visualState.setAggression(transformation.getIrritation() / 100.0F);
+        switch (transformation.getMood()) {
+            case MONSTER -> visualState.setColor(0xFF3A2A);
+            case IRRITATED -> visualState.setColor(0xFFB347);
+            default -> visualState.setColor(0xFF66CC);
+        }
     }
 
     private static float deadZone(float value) {
