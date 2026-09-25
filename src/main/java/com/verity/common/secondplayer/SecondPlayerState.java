@@ -1,12 +1,14 @@
 package com.verity.common.secondplayer;
 
+import com.verity.common.verity.VerityMood;
+
 public final class SecondPlayerState {
     private boolean active;
     private boolean playerSelected;
     private boolean veritySelected;
     private int color;
     private float irritation;
-    private com.verity.common.verity.VerityMood mood = com.verity.common.verity.VerityMood.NORMAL;
+    private VerityMood mood = VerityMood.NORMAL;
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
@@ -23,6 +25,6 @@ public final class SecondPlayerState {
     public float getIrritation() { return irritation; }
     public void setIrritation(float irritation) { this.irritation = irritation; }
 
-    public com.verity.common.verity.VerityMood getMood() { return mood; }
-    public void setMood(com.verity.common.verity.VerityMood mood) { this.mood = mood; }
+    public VerityMood getMood() { return mood; }
+    public void setMood(VerityMood mood) { this.mood = mood; }
 }
